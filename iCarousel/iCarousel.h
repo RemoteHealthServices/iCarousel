@@ -187,6 +187,9 @@ iCarouselOption;
 - (BOOL)carousel:(iCarousel *)carousel shouldSelectItemAtIndex:(NSInteger)index;
 - (void)carousel:(iCarousel *)carousel didSelectItemAtIndex:(NSInteger)index;
 
+- (CGFloat)carousel:(iCarousel *)carousel removeAnimationDurationForItemAtIndex:(NSInteger)index;
+- (void)carousel:(iCarousel *)carousel removeAnimationForItemAtIndex:(NSInteger)index;
+
 - (CGFloat)carouselItemWidth:(iCarousel *)carousel;
 - (CATransform3D)carousel:(iCarousel *)carousel itemTransformForOffset:(CGFloat)offset baseTransform:(CATransform3D)transform;
 - (CGFloat)carousel:(iCarousel *)carousel valueForOption:(iCarouselOption)option withDefault:(CGFloat)value;

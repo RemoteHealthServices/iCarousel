@@ -71,13 +71,13 @@
 #define SCROLL_SPEED_THRESHOLD 2.0f
 #define SCROLL_DISTANCE_THRESHOLD 0.1f
 #define DECELERATION_MULTIPLIER 30.0f
+#define REMOVE_ANIMATION_DURATION 0.1f
 
 #ifdef ICAROUSEL_MACOS
 #define MAX_VISIBLE_ITEMS 50
 #else
 #define MAX_VISIBLE_ITEMS 30
 #endif
-
 
 @interface iCarousel ()
 
@@ -1524,19 +1524,30 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     
     if (animated)
     {
-        
+        CGFloat duration = REMOVE_ANIMATION_DURATION;
+
+        if ([_delegate respondsToSelector:@selector(carousel:removeAnimationDurationForItemAtIndex:)]) {
+            duration = [_delegate carousel:self removeAnimationDurationForItemAtIndex:index];
+        }
+
 #ifdef ICAROUSEL_IOS
         
         [UIView beginAnimations:nil context:nil];
-        [UIView setAnimationDuration:0.1];
+        [UIView setAnimationDuration:duration];
         [UIView setAnimationDelegate:itemView.superview];
         [UIView setAnimationDidStopSelector:@selector(removeFromSuperview)];
-        [self performSelector:@selector(queueItemView:) withObject:itemView afterDelay:0.1];
-        itemView.superview.layer.opacity = 0.0f;
+        [self performSelector:@selector(queueItemView:) withObject:itemView afterDelay:duration];
+
+        if ([_delegate respondsToSelector:@selector(carousel:removeAnimationForItemAtIndex:)]) {
+            [_delegate carousel:self removeAnimationForItemAtIndex:index];
+        } else {
+            itemView.superview.layer.opacity = 0.0f;
+        }
+
         [UIView commitAnimations];
         
         [UIView beginAnimations:nil context:nil];
-        [UIView setAnimationDelay:0.1];
+        [UIView setAnimationDelay:duration];
         [UIView setAnimationDuration:INSERT_DURATION];
         [UIView setAnimationDelegate:self];
         [UIView setAnimationDidStopSelector:@selector(depthSortViews)];
