@@ -330,6 +330,10 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
 
 - (UIView *)itemViewAtIndex:(NSInteger)index
 {
+    if (index < 0 || index >= _itemViews.count) {
+        return nil;
+    }
+
     return [_itemViews objectForKey:[NSNumber numberWithInteger:index]];
 }
 
