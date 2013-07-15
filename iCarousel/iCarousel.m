@@ -1527,34 +1527,30 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
         }
 
 #ifdef ICAROUSEL_IOS
-        
-        [UIView beginAnimations:nil context:nil];
-        [UIView setAnimationDuration:duration];
-        [UIView setAnimationDelegate:itemView.superview];
-        [UIView setAnimationDidStopSelector:@selector(removeFromSuperview)];
+      
+			[UIView animateWithDuration:duration animations:^{
+        if ([_delegate respondsToSelector:@selector(carousel:removeAnimationForItemAtIndex:)]) {
+					[_delegate carousel:self removeAnimationForItemAtIndex:index];
+        } else {
+					itemView.superview.layer.opacity = 0.0f;
+        }
+			} completion:^(BOOL finished) {
+				[itemView.superview removeFromSuperview];
+			}];
         [self performSelector:@selector(queueItemView:) withObject:itemView afterDelay:duration];
 
-        if ([_delegate respondsToSelector:@selector(carousel:removeAnimationForItemAtIndex:)]) {
-            [_delegate carousel:self removeAnimationForItemAtIndex:index];
-        } else {
-            itemView.superview.layer.opacity = 0.0f;
-        }
-
-        [UIView commitAnimations];
-        
-        [UIView beginAnimations:nil context:nil];
-        [UIView setAnimationDelay:duration];
-        [UIView setAnimationDuration:INSERT_DURATION];
-        [UIView setAnimationDelegate:self];
-        [UIView setAnimationDidStopSelector:@selector(depthSortViews)];
+      [UIView animateWithDuration:INSERT_DURATION delay:duration options:nil animations:^{
         [self removeViewAtIndex:index];
         _numberOfItems --;
         _wrapEnabled = !![self valueForOption:iCarouselOptionWrap withDefault:_wrapEnabled];
         [self updateNumberOfVisibleItems];
         _scrollOffset = self.currentItemIndex;
         [self didScroll];
-        [UIView commitAnimations];
-        
+			} completion:^(BOOL finished) {
+				[self depthSortViews];
+			}];
+			
+      
 #else
         
         [CATransaction begin];
@@ -1603,12 +1599,11 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     CGFloat alpha = [self alphaForItemWithOffset:offset];
     
 #ifdef ICAROUSEL_IOS
-    
-    [UIView beginAnimations:nil context:nil];
-    [UIView setAnimationDuration:0.1f];
-    itemView.superview.layer.opacity = alpha;
-    [UIView commitAnimations];
-    
+
+	[UIView animateWithDuration:0.1f animations:^{
+			itemView.superview.layer.opacity = alpha;
+		}];
+  
 #else
     
     [CATransaction begin];
@@ -1640,14 +1635,13 @@ NSComparisonResult compareViewDepth(UIView *view1, UIView *view2, iCarousel *sel
     {
         
 #ifdef ICAROUSEL_IOS
-        
-        [UIView beginAnimations:nil context:nil];
-        [UIView setAnimationDuration:INSERT_DURATION];
-        [UIView setAnimationDelegate:self];
-        [UIView setAnimationDidStopSelector:@selector(loadUnloadViews)];
-        [self transformItemViews];
-        [UIView commitAnimations];
-        
+      
+			[UIView animateWithDuration:INSERT_DURATION animations:^{
+				[self transformItemViews];
+			}completion:^(BOOL finished) {
+				[self loadUnloadViews];
+			}];
+			
 #else
         
         [CATransaction begin];
